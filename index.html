@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Property Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .gallery-item { page-break-inside: avoid; break-inside: avoid; }
+        .gallery-image-container img { transition: opacity 0.3s ease-in-out; }
+        .modal { display: none; }
+        .modal.is-open { display: flex; }
+        #modal-image-container .property-nav { opacity: 0; transition: opacity 0.2s ease-in-out; }
+        #modal-image-container:hover .property-nav { opacity: 1; }
+        #modal-image { transition: opacity 0.2s ease-in-out; }
+    </style>
+</head>
+<body class="bg-white">
+    <div class="grid grid-cols-1 md:grid-cols-3">
+        <!-- Properties will be injected here by JavaScript -->
+    </div>
+
+    <!-- Full-screen Modal -->
+    <div id="modal" class="modal fixed inset-0 bg-black bg-opacity-80 items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-6xl max-h-full flex flex-col relative">
+            <button id="modal-close" class="absolute -top-4 -right-4 bg-white text-black rounded-full h-10 w-10 flex items-center justify-center text-2xl font-bold z-20">&times;</button>
+            
+            <div id="modal-image-container" class="relative w-full h-[70vh] flex items-center justify-center">
+                 <img id="modal-image" src="" alt="Property View" class="w-auto h-auto max-w-full max-h-full object-contain">
+                 
+                 <!-- Property Navigation (e.g., Living Room <-> Kitchen) -->
+                 <button id="modal-prev-prop" class="property-nav absolute left-4 top-1/2 -translate-y-1/2 bg-white/50 hover:bg-white/80 rounded-full p-3 text-3xl font-bold z-10">&lt;</button>
+                 <button id="modal-next-prop" class="property-nav absolute right-4 top-1/2 -translate-y-1/2 bg-white/50 hover:bg-white/80 rounded-full p-3 text-3xl font-bold z-10">&gt;</button>
+            </div>
+
+            <div id="modal-buttons" class="flex justify-center p-4 border-t border-gray-200">
+                <!-- Modal buttons will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const properties = [
+    {
+        id: 'dsc07421-hdr-edit-0',
+        name: 'DSC07421 HDR Edit',
+        images: {
+            real: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07421-HDR-Edit.jpg'],
+            staged: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07426-HDR.jpg'],
+            empty: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07426-HDR-Edit.jpg'],
+        },
+        thumbnail: 'https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07421-HDR-Edit.jpg'
+    },
+    {
+        id: 'dsc07431-hdr-1',
+        name: 'DSC07431 HDR',
+        images: {
+            real: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07431-HDR.jpg'],
+            staged: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07431-HDR-Edit.jpg'],
+            empty: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/extraone.jpg'],
+        },
+        thumbnail: 'https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07431-HDR.jpg'
+    },
+    {
+        id: 'dsc07251-hdr-2',
+        name: 'DSC07251 HDR',
+        images: {
+            real: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07251-HDR.jpg'],
+            staged: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07261-HDR.jpg'],
+            empty: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07266-HDR.jpg'],
+        },
+        thumbnail: 'https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07251-HDR.jpg'
+    },
+    {
+        id: 'dsc07271-hdr-3',
+        name: 'DSC07271 HDR',
+        images: {
+            real: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07271-HDR.jpg'],
+            staged: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07281-HDR.jpg'],
+            empty: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07286-HDR.jpg'],
+        },
+        thumbnail: 'https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07271-HDR.jpg'
+    },
+    {
+        id: 'dsc07291-hdr-4',
+        name: 'DSC07291 HDR',
+        images: {
+            real: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07291-HDR.jpg'],
+            staged: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07296-HDR.jpg'],
+            empty: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07311-HDR.jpg'],
+        },
+        thumbnail: 'https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07291-HDR.jpg'
+    },
+    {
+        id: 'dsc07316-hdr-5',
+        name: 'DSC07316 HDR',
+        images: {
+            real: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07316-HDR.jpg'],
+            staged: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07331-HDR.jpg'],
+            empty: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07336-HDR.jpg'],
+        },
+        thumbnail: 'https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07316-HDR.jpg'
+    },
+    {
+        id: 'dsc07341-hdr-6',
+        name: 'DSC07341 HDR',
+        images: {
+            real: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07341-HDR.jpg'],
+            staged: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07351-HDR.jpg'],
+            empty: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07356-HDR.jpg'],
+        },
+        thumbnail: 'https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07341-HDR.jpg'
+    },
+    {
+        id: 'dsc07361-hdr-7',
+        name: 'DSC07361 HDR',
+        images: {
+            real: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07361-HDR.jpg'],
+            staged: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07366-HDR.jpg'],
+            empty: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07381-HDR.jpg'],
+        },
+        thumbnail: 'https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07361-HDR.jpg'
+    },
+    {
+        id: 'dsc07391-hdr-8',
+        name: 'DSC07391 HDR',
+        images: {
+            real: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07391-HDR.jpg'],
+            staged: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07396-HDR.jpg'],
+            empty: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07401-HDR.jpg'],
+        },
+        thumbnail: 'https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07391-HDR.jpg'
+    },
+    {
+        id: 'dsc07411-hdr-9',
+        name: 'DSC07411 HDR',
+        images: {
+            real: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07411-HDR.jpg'],
+            staged: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07416-HDR.jpg'],
+            empty: ['https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07421-HDR.jpg'],
+        },
+        thumbnail: 'https://raw.githubusercontent.com/Lethalfirestorm/1750/main/DSC07411-HDR.jpg'
+    }
+];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const galleryContainer = document.querySelector('.grid');
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modal-image');
+            const modalButtonsContainer = document.getElementById('modal-buttons');
+            const closeModalBtn = document.getElementById('modal-close');
+            const modalPrevPropBtn = document.getElementById('modal-prev-prop');
+            const modalNextPropBtn = document.getElementById('modal-next-prop');
+            
+            let currentProperty = null;
+            let currentPropertyIndex = 0;
+            let currentView = 'real';
+
+            function renderGallery() {
+                galleryContainer.innerHTML = '';
+                properties.forEach(prop => {
+                    const div = document.createElement('div');
+                    div.className = 'gallery-item relative group cursor-pointer';
+                    div.innerHTML = `
+                        <div class="gallery-image-container w-full aspect-[4/3] bg-gray-100 overflow-hidden">
+                            <img id="img-${prop.id}" src="${prop.thumbnail}" alt="${prop.name}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
+                            <div class="flex justify-center space-x-2" data-prop-id="${prop.id}">
+                                <button class="view-btn bg-blue-500 text-white text-sm font-semibold py-1 px-3 rounded-md shadow transition-colors" data-view="real">Real</button>
+                                <button class="view-btn bg-white/80 hover:bg-white text-black text-sm font-semibold py-1 px-3 rounded-md shadow transition-colors" data-view="staged">Staged</button>
+                                <button class="view-btn bg-white/80 hover:bg-white text-black text-sm font-semibold py-1 px-3 rounded-md shadow transition-colors" data-view="empty">Empty</button>
+                            </div>
+                        </div>
+                    `;
+                    galleryContainer.appendChild(div);
+                });
+            }
+
+            function openModal(prop, viewType) {
+                currentProperty = prop;
+                currentPropertyIndex = properties.findIndex(p => p.id === prop.id);
+                currentView = viewType;
+                updateModalContent();
+                modal.classList.add('is-open');
+            }
+
+            function updateModalContent() {
+                modalImage.style.opacity = '0';
+                setTimeout(() => {
+                    modalImage.src = currentProperty.images[currentView][0];
+                    modalImage.style.opacity = '1';
+                }, 200);
+
+                modalButtonsContainer.innerHTML = '';
+                ['real', 'staged', 'empty'].forEach(view => {
+                    const button = document.createElement('button');
+                    button.textContent = view.charAt(0).toUpperCase() + view.slice(1);
+                    button.className = `mx-2 py-2 px-6 rounded-md font-semibold transition-colors ${currentView === view ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`;
+                    button.onclick = () => {
+                        currentView = view;
+                        updateModalContent();
+                    };
+                    modalButtonsContainer.appendChild(button);
+                });
+            }
+            
+            galleryContainer.addEventListener('click', (e) => {
+                const buttonGroup = e.target.closest('[data-prop-id]');
+                const view = e.target.dataset.view;
+                const galleryItem = e.target.closest('.gallery-item');
+
+                if (view && buttonGroup) { // Clicked a view button
+                    e.stopPropagation();
+                    const propId = buttonGroup.dataset.propId;
+                    const prop = properties.find(p => p.id === propId);
+                    const mainImage = document.getElementById(`img-${propId}`);
+                    
+                    const allButtonsInGroup = buttonGroup.querySelectorAll('.view-btn');
+                    allButtonsInGroup.forEach(btn => {
+                        btn.classList.remove('bg-blue-500', 'text-white');
+                        btn.classList.add('bg-white/80', 'text-black');
+                    });
+                    e.target.classList.add('bg-blue-500', 'text-white');
+                    e.target.classList.remove('bg-white/80', 'text-black');
+
+                    mainImage.style.opacity = '0';
+                    setTimeout(() => {
+                        mainImage.src = prop.images[view][0];
+                        mainImage.style.opacity = '1';
+                    }, 300);
+
+                } else if (galleryItem) { // Clicked a gallery item to open modal
+                    const img = galleryItem.querySelector('img');
+                    if (!img) return;
+                    const id = img.id.replace('img-', '');
+                    const prop = properties.find(p => p.id === id);
+                    const currentSrc = img.src;
+                    
+                    let initialView = 'real';
+                    for(const [viewType, urls] of Object.entries(prop.images)) {
+                        if(urls.includes(currentSrc)) {
+                            initialView = viewType;
+                            break;
+                        }
+                    }
+                    openModal(prop, initialView);
+                }
+            });
+
+            closeModalBtn.addEventListener('click', () => modal.classList.remove('is-open'));
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.remove('is-open');
+            });
+
+            modalNextPropBtn.addEventListener('click', () => {
+                currentPropertyIndex = (currentPropertyIndex + 1) % properties.length;
+                openModal(properties[currentPropertyIndex], currentView);
+            });
+
+            modalPrevPropBtn.addEventListener('click', () => {
+                currentPropertyIndex = (currentPropertyIndex - 1 + properties.length) % properties.length;
+                openModal(properties[currentPropertyIndex], currentView);
+            });
+            
+            renderGallery();
+        });
+    </script>
+</body>
+</html>
